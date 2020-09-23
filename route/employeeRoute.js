@@ -2,6 +2,25 @@ const express = require('express');
 var router = express.Router();
 const mongoose = require('mongoose');
 const Employee = mongoose.model('Employee');
+const employee=require('../models/employeeModel')
+const bcrypt=require('bcryptjs')
+
+router.get('/login',(req,res)=>{
+    res.render('employee/login',{
+        message:'LOGIN PAGE'
+    })
+    
+})
+
+router.post('/login',async(req,res) =>{
+    try{
+        const user=await employee.findByCredentials(req.body.email,req.body.password)
+        res.send({user})
+    }catch(e){
+        res.status(400).send(e)
+    }
+})
+
 
 router.get('/', (req, res) => {
     res.render("employee/addOrEdit", {
@@ -24,7 +43,9 @@ function insertRecord(req, res) {
     employee.mobile = req.body.mobile;
     employee.city = req.body.city;
     employee.jobRole=req.body.jobRole;
-    employee.salary=req.body.salary
+    employee.salary=req.body.salary;
+    employee.password=req.body.password;
+    //employee.password= bcrypt.hash(req.body.password,8)
     employee.save((err, doc) => {
         if (!err)
             res.redirect('employee/list');

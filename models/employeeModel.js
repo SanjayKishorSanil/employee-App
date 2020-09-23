@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt=require('bcryptjs')
 
 var employeeSchema = new mongoose.Schema({
     fullName: {
@@ -20,6 +21,10 @@ var employeeSchema = new mongoose.Schema({
     salary:{
         type:String,
         default:0
+    },
+    password:{
+        type:String,
+        required:true
     }
 });
 
@@ -29,4 +34,31 @@ employeeSchema.path('email').validate((val) => {
     return emailRegex.test(val);
 }, 'Invalid e-mail.');
 
-mongoose.model('Employee', employeeSchema);
+
+
+employeeSchema.statics.findByCredentials = async (email,password) => {
+    const user= Employee.findOne({email}) 
+    console.log(user)
+    if(!user){
+       return new Error('unable to login')
+    }
+    const isMatch= await bcrypt.compare(password,user.password)
+
+    if(!isMatch){
+        return new Error ('unable to login')
+        
+    }
+    return user
+
+}
+
+employeeSchema.pre('save',async function(next){
+    const user=this
+
+    if(user.isModified('password')){
+        user.password=await bcrypt.hash(user.password,8)
+    }
+    next()
+})
+const Employee=mongoose.model('Employee', employeeSchema);
+module.exports=Employee

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>LOGIN</title>
+    </head>
+    <body>
+        <h1>{{message}}</h1>
+        <form action="/employee/login" method="POST" >
+    <div class="form-group">
+        <label>Email</label>
+        <input type="text" class="form-control" name="email" placeholder="Email" required>
+    </div>
+    <div class="form-group">
+        <label>Password</label>
+        <input type="text" class="form-control" name="password" placeholder="Password" required>
+    </div>
+     <button type="submit" class="btn btn-info"><i class="fa fa-database"></i> Submit</button>
+        </form>
+    </body>
+</html>
