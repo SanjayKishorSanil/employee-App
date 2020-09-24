@@ -36,21 +36,7 @@ employeeSchema.path('email').validate((val) => {
 
 
 
-employeeSchema.statics.findByCredentials = async (email,password) => {
-    const user= Employee.findOne({email}) 
-    console.log(user)
-    if(!user){
-       return new Error('unable to login')
-    }
-    const isMatch= await bcrypt.compare(password,user.password)
 
-    if(!isMatch){
-        return new Error ('unable to login')
-        
-    }
-    return user
-
-}
 
 employeeSchema.pre('save',async function(next){
     const user=this
