@@ -5,6 +5,7 @@ const Employee = mongoose.model('Employee');
 const employee=require('../models/employeeModel')
 const Manager=require('../models/managerModel')
 const bcrypt=require('bcryptjs')
+const auth=require('../middleware/auth')
 
 router.get('/login',(req,res)=>{
     res.render('employee/login',{
@@ -17,7 +18,7 @@ router.post('/login',async(req,res) =>{
     try{
        
        const emp= await Employee.findOne({email:req.body.email})
-       
+       const token= await emp.generateAuthToken()
         if(!emp){
            
           return res.send('Invalid credentials')
@@ -31,16 +32,21 @@ router.post('/login',async(req,res) =>{
         }
         
         //res.send({emp})
+        //console.log(emp)
+        //console.log(token)
         if(emp.jobRole === 'Manager'){
+            res.setHeader('Authorization','Bearer '+token)
             res.render("layouts/dashboardManager", {
                 message:'Sucessfully Logged In',
-                emp
+                emp,
+                token
             });   
 
         }else{
             res.render("layouts/dashboard", {
                 message:'Sucessfully Logged In',
-                emp
+                emp,
+                token
             });
         }
 
@@ -63,7 +69,7 @@ router.post('/', (req, res) => {
         updateRecord(req, res);
 });
 
-function insertRecord(req, res) {
+ insertRecord = async(req, res) =>{
 
     if(req.body.jobRole != 'Manager'){
         
@@ -90,6 +96,7 @@ function insertRecord(req, res) {
                     console.log('Error during record insertion : ' + err);
             }
         });
+       const token = await employee.generateAuthToken()
     }else{
         var employee = new Employee();
         employee.fullName = req.body.fullName;
@@ -115,6 +122,7 @@ function insertRecord(req, res) {
                     console.log('Error during record insertion : ' + err);
             }
         });
+        const token = await employee.generateAuthToken()
     }
   
 }
@@ -140,9 +148,11 @@ function updateRecord(req, res) {
 router.get('/listForManager/:id',(req,res)=>{
         Employee.find((err,docs)=>{
             const m_id=req.params.id
+
                     if(!err){
                         const doc = docs.filter(emp=> emp.jobRole != 'Manager')
                        // console.log(doc)
+                       //res.setHeader('Authorization','Bearer '+token)
                         res.render("employee/listForManager", {
                             list: doc,
                             managerId: m_id
@@ -156,9 +166,56 @@ router.get('/listForManager/:id',(req,res)=>{
 
 })
 
-router.get('/addReportee/:valueId',(req,res)=>{
-    const Ids=req.params.valueId
-    console.log(Ids)
+router.get('/addReportee/:mId&:eId',(req,res)=>{
+    
+    const m_id=req.params.mId
+    const e_id=req.params.eId
+    console.log(m_id,e_id)
+    const manager=new Manager()
+    manager.managerId=m_id
+    manager.reportee=e_id
+    manager.save((err,doc)=>{
+        if(!err){
+            console.log('Added sucessfully')
+            Manager.find((err,docs)=>{
+                       
+                        if(!err){
+                            const doc = docs.filter(mng=> mng._id != m_id)
+                            console.log(doc)
+                           // var i=0
+                           const  reporteeList=[]
+                            doc.forEach(emp =>{
+                                
+                                console.log(emp.reportee)
+                                Employee.findById(emp.reportee, (err,doc)=>{
+                                   // console.log(doc)
+                                   // reporteeList.push(doc)
+                                   // console.log(reporteeList[i])
+                                   // i=i+1
+
+                                })
+                            })
+                            console.log(reporteeList)
+                           
+
+
+                           //res.setHeader('Authorization','Bearer '+token)
+                        //    res.render("employee/reporteeList", {
+                        //     list: doc
+                    
+                        //      });
+        
+                        }else{
+                            res.send('ERROR OCCURED IN FUNCTION')
+                        }
+    
+                   })
+            console.log('Added reportee sucessfully')
+        }else{
+            console.log(err)
+        }
+    })
+
 })
 router.get('/list', (req, res) => {
     Employee.find((err, docs) => {

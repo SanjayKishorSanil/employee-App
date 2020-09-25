@@ -6,12 +6,11 @@ var managerSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'Employee'
     },
-    reportees:[{
-        reportee:{
+    reportee:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Employee'
-        }
-    }]
+        
+    }
 });
 
 

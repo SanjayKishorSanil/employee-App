@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt=require('bcryptjs')
+const jwt=require('jsonwebtoken')
 
 var employeeSchema = new mongoose.Schema({
     fullName: {
@@ -25,8 +26,25 @@ var employeeSchema = new mongoose.Schema({
     password:{
         type:String,
         required:true
-    }
+    },
+    tokens:[{
+        token:{
+            type:String,
+            required:true
+        }
+    }]
 });
+
+employeeSchema.methods.generateAuthToken= async function(){
+    const employee=this
+    const token=jwt.sign({_id: employee._id.toString()},'thisisanapp')
+
+    employee.tokens = employee.tokens.concat({ token})
+    await employee.save()
+    return token
+
+}
+
 
 
 employeeSchema.path('email').validate((val) => {
