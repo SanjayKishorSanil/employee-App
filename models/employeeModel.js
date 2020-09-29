@@ -27,6 +27,20 @@ var employeeSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    //leaves:[{
+    //     date:{
+    //         type:String,
+    //         require:true
+    //     },
+    //     reason:{
+    //         type: String
+    //     },
+    //     status:{
+    //         type:String,
+    //         default:'Pending'
+    //     }
+
+    // }],
     tokens:[{
         token:{
             type:String,

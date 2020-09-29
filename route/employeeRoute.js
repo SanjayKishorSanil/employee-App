@@ -165,58 +165,92 @@ router.get('/listForManager/:id',(req,res)=>{
                })
 
 })
-
 router.get('/addReportee/:mId&:eId',(req,res)=>{
     
     const m_id=req.params.mId
     const e_id=req.params.eId
+    let a=[]
     console.log(m_id,e_id)
     const manager=new Manager()
-    manager.managerId=m_id
-    manager.reportee=e_id
-    manager.save((err,doc)=>{
+    Manager.find((err,docs)=>{
         if(!err){
-            console.log('Added sucessfully')
-            Manager.find((err,docs)=>{
-                       
-                        if(!err){
-                            const doc = docs.filter(mng=> mng._id != m_id)
-                            console.log(doc)
-                           // var i=0
-                           const  reporteeList=[]
-                            doc.forEach(emp =>{
-                                
-                                console.log(emp.reportee)
-                                Employee.findById(emp.reportee, (err,doc)=>{
-                                   // console.log(doc)
-                                   // reporteeList.push(doc)
-                                   // console.log(reporteeList[i])
-                                   // i=i+1
+            const doc = docs.filter(mng=> mng._id != m_id)
+            console.log( 'doc value',doc.length)
+            if(doc.length===0){
+                console.log('Added sucessfully')
+                manager.managerId=m_id
+                manager.reportees=manager.reportees.concat({reportee:e_id})
+                manager.save()
 
-                                })
-                            })
-                            console.log(reporteeList)
-                           
-
-
-                           //res.setHeader('Authorization','Bearer '+token)
-                        //    res.render("employee/reporteeList", {
-                        //     list: doc
-                    
-                        //      });
-        
-                        }else{
-                            res.send('ERROR OCCURED IN FUNCTION')
-                        }
-    
-                   })
-            console.log('Added reportee sucessfully')
-        }else{
-            console.log(err)
+            }else{
+                doc.forEach(mng=>{
+                    mng.reportees=mng.reportees.concat({reportee:e_id})
+                    mng.save()
+                })
+            }
+            doc.forEach(mng=>{
+               mng.reportees.forEach(doc=>{
+                   console.log(doc)
+                   console.log('doc_id', doc.reportee)
+                  // a=Employee.findById(doc.reportee)
+                  a= Employee.findOne({_id:doc.reportee})
+                })
+            })
+            console.log(a)
         }
     })
 
+
 })
+
+// router.get('/addReportee/:mId&:eId',(req,res)=>{
+    
+//     const m_id=req.params.mId
+//     const e_id=req.params.eId
+//     console.log(m_id,e_id)
+//     var reporteeList=[]
+//     const manager=new Manager()
+//     manager.managerId=m_id
+//     manager.reportees=manager.reportees.concat({e_id})
+//     manager.save((err,doc)=>{
+//         if(!err){
+//             console.log('Added sucessfully')
+//             Manager.find((err,docs)=>{
+                       
+//                         if(!err){
+//                             const doc = docs.filter(mng=> mng._id != m_id)
+//                             console.log(doc)
+//                             //var i=0
+//                            //declared arrary
+//                             doc.forEach(emp =>{
+                                
+//                                 console.log(emp.reportee)
+//                                let a= Employee.findById(emp.reportee, (err,doc)=>{
+//                                    reporteeList.push(doc)
+//                                 })
+//                             })
+//                             console.log( 'reportee list',a) // here its displaying undefined why??
+                        
+
+
+//                            //res.setHeader('Authorization','Bearer '+token)
+//                         //    res.render("employee/reporteeList", {
+//                         //     list: doc
+                    
+//                         //      });
+        
+//                         }else{
+//                             res.send('ERROR OCCURED IN FUNCTION')
+//                         }
+    
+//                    })
+//             console.log('Added reportee sucessfully')
+//         }else{
+//             console.log(err)
+//         }
+//     })
+
+// })
 router.get('/list', (req, res) => {
     Employee.find((err, docs) => {
         // console.log(docs)
