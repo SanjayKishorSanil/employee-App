@@ -165,12 +165,12 @@ router.get('/listForManager/:id',(req,res)=>{
                })
 
 })
-router.get('/addReportee/:mId&:eId',(req,res)=>{
+router.get('/addReportee/:mId&:eId',async(req,res)=>{
     
     const m_id=req.params.mId
     const e_id=req.params.eId
-    let a=[]
     console.log(m_id,e_id)
+    const reporteeList=[]
     const manager=new Manager()
     Manager.find((err,docs)=>{
         if(!err){
@@ -183,20 +183,23 @@ router.get('/addReportee/:mId&:eId',(req,res)=>{
                 manager.save()
 
             }else{
-                doc.forEach(mng=>{
+                doc.forEach(async mng=>{
                     mng.reportees=mng.reportees.concat({reportee:e_id})
-                    mng.save()
+                    await mng.save()
                 })
             }
             doc.forEach(mng=>{
-               mng.reportees.forEach(doc=>{
+               mng.reportees.forEach( async doc=>{
                    console.log(doc)
                    console.log('doc_id', doc.reportee)
-                  // a=Employee.findById(doc.reportee)
-                  a= Employee.findOne({_id:doc.reportee})
+                   //a= await Employee.findById(doc.reportee)
+                 let a= await Employee.findOne({_id:doc.reportee})
+                 reporteeList.push(a)
+
+                  console.log('a',a)
                 })
             })
-            console.log(a)
+            console.log('reporteeList',reporteeList)
         }
     })
 
