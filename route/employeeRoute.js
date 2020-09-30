@@ -193,10 +193,18 @@ router.get('/addReportee/:mId&:eId',async(req,res)=>{
                    console.log(doc)
                    console.log('doc_id', doc.reportee)
                    //a= await Employee.findById(doc.reportee)
-                 let a= await Employee.findOne({_id:doc.reportee})
-                 reporteeList.push(a)
-
+                // let a= await Employee.findOne({_id:doc.reportee})
+                // reporteeList.push(a)
+                  const a=  await Employee.findOne({_id:doc.reportee})
                   console.log('a',a)
+                  a.then((result)=>{
+                        console.log(result)
+                        reporteeList.push(a)
+                    }).catch((error)=>{
+                        console.log(error)
+                    })
+
+                 //console.log('a',a)
                 })
             })
             console.log('reporteeList',reporteeList)
