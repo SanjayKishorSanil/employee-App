@@ -5,12 +5,17 @@
     </head>
     <body>
         <h1>Assign Task</h1>
-        <form action="#" method="POST" >
+        <h2>{{message}}</h2>
+        <form action="/employee/assignTask" method="POST" >
     <div class="form-group">
-        <label>Task Name</label>
+        <input type="text" class="form-control" name="managerId" value="{{managerId}}">
+         <input type="text" class="form-control" name="employeeId" value="{{employeeId}}">
+         <label>Task Name</label>
         <input type="text" class="form-control" name="task" placeholder="task" required>
     </div>
-     <button type="submit" class="btn btn-info"><i class="fa fa-database"></i> Submit</button>
+     <button type="submit" class="btn btn-info"><i class="fa fa-database"></i> Assign</button>
+     <a href="/employee/listForManager/{{managerId}}">View Employee</a>
         </form>
+    
     </body>
 </html>

@@ -27,6 +27,14 @@ var employeeSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    tasks:[{
+        managerID:{
+            type: mongoose.Schema.Types.ObjectId
+        },
+        taskGiven:{
+            type:String
+        }
+    }],
     //leaves:[{
     //     date:{
     //         type:String,

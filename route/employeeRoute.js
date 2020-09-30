@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Employee = mongoose.model('Employee');
 const employee=require('../models/employeeModel')
 const Manager=require('../models/managerModel')
+const Task=require('../models/taskModel')
 const bcrypt=require('bcryptjs')
 const auth=require('../middleware/auth')
 
@@ -165,6 +166,57 @@ router.get('/listForManager/:id',(req,res)=>{
                })
 
 })
+router.get('/addTask/:mId&:eId',async(req,res)=>{
+    const m_id=req.params.mId
+    const e_id=req.params.eId
+
+    res.render("employee/assignTask",{
+        managerId:m_id,
+        employeeId:e_id
+    })
+})
+
+router.post('/assignTask', async(req,res)=>{
+    console.log(req.body)
+    const m_id=req.body.managerId
+    const e_id=req.body.employeeId
+    var task = new Task()
+    task.managerId=req.body.managerId
+    task.employeeId=req.body.employeeId
+    task.task=req.body.task
+    Employee.findById(e_id,async(err,employee)=>{
+        employee.tasks=employee.tasks.concat({ managerID : req.body.managerId, taskGiven:req.body.task})
+        await employee.save()
+    })
+    
+    await task.save((err,doc)=>{
+        if(!err){
+            console.log('Sucessfully added')
+            res.render("employee/assignTask",{
+                managerId:m_id,
+                employeeId:e_id,
+                message:'Sucessfully Assigned'
+            })
+            
+          
+        }
+        else{
+           console.log(err)
+        }
+    })
+
+})
+
+
+router.get('/viewTasks/:id',async(req,res)=>{
+    const m_id=req.params.id
+    Task.find(async(err,docs)=>{
+        if(!err){
+            const doc=docs.filter(emp=> emp.managerId != m_id)
+            console.log(doc)
+        }
+    })
+})
 router.get('/addReportee/:mId&:eId',async(req,res)=>{
     
     const m_id=req.params.mId
@@ -172,7 +224,7 @@ router.get('/addReportee/:mId&:eId',async(req,res)=>{
     console.log(m_id,e_id)
     const reporteeList=[]
     const manager=new Manager()
-    Manager.find((err,docs)=>{
+    Manager.find(async(err,docs)=>{
         if(!err){
             const doc = docs.filter(mng=> mng._id != m_id)
             console.log( 'doc value',doc.length)
@@ -180,7 +232,7 @@ router.get('/addReportee/:mId&:eId',async(req,res)=>{
                 console.log('Added sucessfully')
                 manager.managerId=m_id
                 manager.reportees=manager.reportees.concat({reportee:e_id})
-                manager.save()
+                await manager.save()
 
             }else{
                 doc.forEach(async mng=>{
@@ -188,82 +240,25 @@ router.get('/addReportee/:mId&:eId',async(req,res)=>{
                     await mng.save()
                 })
             }
-            for ( const a of doc){
-                console.log(a)
-                
+            for( const mng of doc){
+                console.log(mng)
+                for( const doc of mng.reportees){
+                    let a= await Employee.findOne({_id:doc.reportee})
+                    reporteeList.push(a)
+                }
             }
-            // doc.forEach(async mng=>{
-            //   mng.reportees.forEach( async doc=>{
-            //        console.log(doc)
-            //        console.log('doc_id', doc.reportee)
-                   
-            //        //a= await Employee.findById(doc.reportee)
-            //     // let a= await Employee.findOne({_id:doc.reportee})
-            //     // reporteeList.push(a)
-            //        await Employee.findOne({_id:doc.reportee}).then((results)=>{
-            //             console.log( 'result',results)
-            //            reporteeList.push(results)
-            //        }).catch((error)=>{
-            //            console.log(error)
-            //        })
-            //      //console.log('a',a)
-            //     })
-            // })
             console.log('reporteeList',reporteeList)
+            res.render("employee/reporteeList", {
+                managerId:m_id,
+                list: reporteeList
+            })
+
         }
     })
 
 
 })
 
-// router.get('/addReportee/:mId&:eId',(req,res)=>{
-    
-//     const m_id=req.params.mId
-//     const e_id=req.params.eId
-//     console.log(m_id,e_id)
-//     var reporteeList=[]
-//     const manager=new Manager()
-//     manager.managerId=m_id
-//     manager.reportees=manager.reportees.concat({e_id})
-//     manager.save((err,doc)=>{
-//         if(!err){
-//             console.log('Added sucessfully')
-//             Manager.find((err,docs)=>{
-                       
-//                         if(!err){
-//                             const doc = docs.filter(mng=> mng._id != m_id)
-//                             console.log(doc)
-//                             //var i=0
-//                            //declared arrary
-//                             doc.forEach(emp =>{
-                                
-//                                 console.log(emp.reportee)
-//                                let a= Employee.findById(emp.reportee, (err,doc)=>{
-//                                    reporteeList.push(doc)
-//                                 })
-//                             })
-//                             console.log( 'reportee list',a) // here its displaying undefined why??
-                        
-
-
-//                            //res.setHeader('Authorization','Bearer '+token)
-//                         //    res.render("employee/reporteeList", {
-//                         //     list: doc
-                    
-//                         //      });
-        
-//                         }else{
-//                             res.send('ERROR OCCURED IN FUNCTION')
-//                         }
-    
-//                    })
-//             console.log('Added reportee sucessfully')
-//         }else{
-//             console.log(err)
-//         }
-//     })
-
-// })
 router.get('/list', (req, res) => {
     Employee.find((err, docs) => {
         // console.log(docs)

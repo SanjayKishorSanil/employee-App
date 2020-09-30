@@ -13,11 +13,8 @@ var managerSchema = new mongoose.Schema({
         }
         
         
-    }],
-    taskAssigned:{
-        type:String,
-        default:'Not Assigned'
-    }
+    }]
+
 });
 
 
