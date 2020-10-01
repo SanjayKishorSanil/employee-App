@@ -192,7 +192,7 @@ router.post('/assignTask', async(req,res)=>{
     await task.save((err,doc)=>{
         if(!err){
             console.log('Sucessfully added')
-            res.render("employee/assignTask",{
+          res.render("employee/assignTask",{
                 managerId:m_id,
                 employeeId:e_id,
                 message:'Sucessfully Assigned'
@@ -224,82 +224,28 @@ router.get('/addReportee/:mId&:eId',async(req,res)=>{
     console.log(m_id,e_id)
     const reporteeList=[]
     const manager=new Manager()
-    Manager.findOne({managerId:m_id}, async (err,doc)=>{
-         if(doc===null){
-            manager.managerId=m_id
-            manager.reportees=manager.reportees.concat({reportee:e_id})
-            await manager.save()
-        }else{
-            doc.reportees=doc.reportees.concat({reportee:e_id})
-            await doc.save()
-        }
-    })
+    let m= await Manager.findOne({managerId:m_id})
+    if(m===null){
+        manager.managerId=m_id
+        manager.reportees=manager.reportees.concat({reportee:e_id})
+        await manager.save()
+        console.log('Sucessfuly added')
+    }else{
+        m.reportees=m.reportees.concat({reportee:e_id})
+        await m.save()
+        console.log('sucessfully added reportee')
+    }
 
-    Manager.findOne({managerId:req.params.mId}, async (err,doc)=>{
-        console.log(doc)
-        for(const mng of doc.reportees){
-            let a = await Employee.findOne({_id:mng.reportee})
-            console.log('a',a)
-            reporteeList.push(a)
-        }
-
-    })
-    console.log('reporteeList',reporteeList)
+    for(const mng of m.reportees){
+        let a =await Employee.findOne({_id:mng.reportee})
+        console.log('a',a)
+        reporteeList.push(a)
+    }
     res.render("employee/reporteeList", {
         managerId:m_id,
             list: reporteeList
     })
         
-    
-  /*  Manager.find(async(err,docs)=>{
-        console.log('DOCS VALUE',docs)
-        if(!err){
-
-            Manager.findOne({managerId:m_id}).then(async (doc)=>{
-                console.log('value of finding mangere id',doc)
-                if(doc==null){
-                    manager.managerId=m_id
-                    manager.reportees=manager.reportees.concat({reportee:e_id})
-                    await manager.save()
-                }else{
-                        doc.reportees=doc.reportees.concat({reportee:e_id})
-                        await doc.save()
-                    
-                }
-
-            }).then((result)=>{
-                Manager.findOne({managerId:req.params.mId}).then(async(managerList)=>{
-                    console.log('mamanager list',managerList)
-                    for(const mng of managerList.reportees){
-                        console.log(mng)
-                        let a= await Employee.findOne({_id:mng.reportee})
-                        console.log(a)
-                        reporteeList.push(a)
-                    }
-                }).catch((err)=>{
-                    console.log(err)
-                })
-                
-            })
-
-
-            // const doc = docs.filter(async mng=> mng.managerId === req.params.mId)
-            // console.log('DOC value',doc)
-            // for( const mng of doc){
-            //     console.log(mng)
-            //     for( const doc of mng.reportees){
-            //         let a= await Employee.findOne({_id:doc.reportee})
-            //         reporteeList.push(a)
-            //     }
-            // }
-            console.log('reporteeList',reporteeList)
-            res.render("employee/reporteeList", {
-                managerId:m_id,
-                list: reporteeList
-            })
-
-        }
-    })*/
 
 
 })
