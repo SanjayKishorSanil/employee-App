@@ -225,28 +225,46 @@ router.get('/addReportee/:mId&:eId',async(req,res)=>{
     const reporteeList=[]
     const manager=new Manager()
     Manager.find(async(err,docs)=>{
+        console.log('DOCS VALUE',docs)
         if(!err){
-            const doc = docs.filter(mng=> mng._id != m_id)
-            console.log( 'doc value',doc.length)
-            if(doc.length===0){
-                console.log('Added sucessfully')
-                manager.managerId=m_id
-                manager.reportees=manager.reportees.concat({reportee:e_id})
-                await manager.save()
 
-            }else{
-                doc.forEach(async mng=>{
-                    mng.reportees=mng.reportees.concat({reportee:e_id})
-                    await mng.save()
-                })
-            }
-            for( const mng of doc){
-                console.log(mng)
-                for( const doc of mng.reportees){
-                    let a= await Employee.findOne({_id:doc.reportee})
-                    reporteeList.push(a)
+            Manager.findOne({managerId:m_id}).then(async (doc)=>{
+                console.log('value of finding mangere id',doc)
+                if(doc==null){
+                    manager.managerId=m_id
+                    manager.reportees=manager.reportees.concat({reportee:e_id})
+                    await manager.save()
+                }else{
+                        doc.reportees=doc.reportees.concat({reportee:e_id})
+                        await doc.save()
+                    
                 }
-            }
+
+            }).then((result)=>{
+                Manager.findOne({managerId:req.params.mId}).then(async(managerList)=>{
+                    console.log('mamanager list',managerList)
+                    for(const mng of managerList.reportees){
+                        console.log(mng)
+                        let a= await Employee.findOne({_id:mng.reportee})
+                        console.log(a)
+                        reporteeList.push(a)
+                    }
+                }).catch((err)=>{
+                    console.log(err)
+                })
+                
+            })
+
+
+            // const doc = docs.filter(async mng=> mng.managerId === req.params.mId)
+            // console.log('DOC value',doc)
+            // for( const mng of doc){
+            //     console.log(mng)
+            //     for( const doc of mng.reportees){
+            //         let a= await Employee.findOne({_id:doc.reportee})
+            //         reporteeList.push(a)
+            //     }
+            // }
             console.log('reporteeList',reporteeList)
             res.render("employee/reporteeList", {
                 managerId:m_id,
