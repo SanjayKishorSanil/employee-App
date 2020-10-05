@@ -146,6 +146,7 @@ function updateRecord(req, res) {
     });
 }
 
+
 router.get('/listForManager/:id',(req,res)=>{
         Employee.find((err,docs)=>{
             const m_id=req.params.id
@@ -165,6 +166,23 @@ router.get('/listForManager/:id',(req,res)=>{
 
                })
 
+})
+router.get('/listStatus/:id',async (req,res)=>{
+    const employeeList=[]
+    const m_id=req.params.id
+    console.log(m_id)
+    
+    Task.find({managerId:m_id},async(err,docs)=>{
+        docs.forEach(e=>{
+            Employee.findOne({_id:e.employeeId},async(err,doc)=>{
+                console.log('docs',docs)
+                console.log('doc',doc)
+                employeeList.push(doc)
+            })
+        })
+
+    })
+    console.log('employeeList',employeeList)
 })
 router.get('/addTask/:mId&:eId',async(req,res)=>{
     const m_id=req.params.mId
@@ -207,16 +225,6 @@ router.post('/assignTask', async(req,res)=>{
 
 })
 
-
-router.get('/viewTasks/:id',async(req,res)=>{
-    const m_id=req.params.id
-    Task.find(async(err,docs)=>{
-        if(!err){
-            const doc=docs.filter(emp=> emp.managerId != m_id)
-            console.log(doc)
-        }
-    })
-})
 router.get('/addReportee/:mId&:eId',async(req,res)=>{
     
     const m_id=req.params.mId
@@ -249,7 +257,45 @@ router.get('/addReportee/:mId&:eId',async(req,res)=>{
 
 
 })
+router.get('/employeeViewTask/:id',async (req,res)=>{
+    const e_id = req.params.id
+    Employee.findById(e_id,async(err,doc)=>{
+        if(!err){
+            const t=doc.tasks
+            res.render('employee/viewTask',{
+                list:t,
+                eid:e_id
+            })
+        }
+        
+    })
+})
 
+router.get('/updateStatus/:eid&:mid',async (req,res)=>{
+    const eid=req.params.eid
+    const mid=req.params.mid
+    console.log(eid,mid)
+    res.render('employee/updateTaskStatus',{
+        e_id:eid,
+        m_id:mid
+
+    })
+    
+})
+
+router.post('/setStatus', async (req,res)=>{
+    var task = new Task()
+    const m_id=req.body.managerId
+    const e_id=req.body.employeeId
+    console.log(e_id,m_id)
+    Task.findOne({managerId:m_id,employeeId:e_id},async(err,doc)=>{
+        doc.status=req.body.status
+        await doc.save()
+    })
+    res.render('employee/sucessPage',{
+        eid:e_id
+    })
+})
 router.get('/list', (req, res) => {
     Employee.find((err, docs) => {
         // console.log(docs)

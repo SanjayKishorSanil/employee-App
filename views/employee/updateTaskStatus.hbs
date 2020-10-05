@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Update Status</title>
+    </head>
+    <body>
+        <h1>Update Status</h1>
+        <form action="/employee/setStatus" method="POST" >
+    <div class="form-group">
+         <input type="text" class="form-control" name="managerId" value="{{m_id}}">
+         <input type="text" class="form-control" name="employeeId" value="{{e_id}}">
+         <label>Status</label>
+        <input type="text" class="form-control" name="status" placeholder="Status of the task" required>
+    </div>
+     <button type="submit" class="btn btn-info"><i class="fa fa-database"></i> Update</button>
+        </form>
+    
+    </body>
+</html>

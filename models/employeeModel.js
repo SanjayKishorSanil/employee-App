@@ -33,6 +33,9 @@ var employeeSchema = new mongoose.Schema({
         },
         taskGiven:{
             type:String
+        },
+        status:{
+            type:String
         }
     }],
     //leaves:[{

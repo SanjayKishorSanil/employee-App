@@ -1,0 +1,21 @@
+<h1>View Task</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Manager Name</th>
+            <th>Task Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each list}}
+        
+        <tr>
+            <td>{{this.managerID}}</td>
+            <td>{{this.taskGiven}}</td>
+            <td>
+                <a href="/employee/updateStatus/{{../eid}}&{{this.managerID}}"><i class="fa fa-pencil fa-lg" aria-hidden="true"></i> Update Status</a>
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
