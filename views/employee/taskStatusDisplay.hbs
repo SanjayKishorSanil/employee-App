@@ -1,0 +1,23 @@
+<h1>View Task Status</h1>
+ <a class="btn btn-secondary" href="#"  style="color: black;">My Profile</a>
+<table class="table table-striped">
+    <h2></h2>
+    <thead>
+        <tr>
+            <th>Task Name</th>
+            <th>Status Updated</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each list}}
+        
+        <tr>
+            <td>{{this.taskGiven}}</td>
+            <td>{{this.status}}</td>
+            <td>
+                <a href="/employee/updateRemark/{{this._id}}&{{this.managerID}}"><i class="fa fa-pencil fa-lg" aria-hidden="true"></i> Update Remark</a>
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>

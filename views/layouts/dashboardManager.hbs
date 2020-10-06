@@ -4,6 +4,7 @@
         <title>Manager Dashboard</title>
     </head>
     <body>
+
         <label for="Result">{{message}}</label>
         <h1>Welcome {{emp.fullName}}</h1>
         <h2>Your Profile</h2>
@@ -16,8 +17,9 @@
             
         </div>
         <div>
-            <a href="/employee/listForManager/{{emp._id}}">View Employee</a>
-            <a href="/employee/listStatus/{{emp._id}}">Check Task Status</a>
+            <a class="btn btn-secondary" href="/employee/listForManager/{{emp._id}}">View Employee</a>
+            <a  class="btn btn-secondary" href="/employee/listStatus/{{emp._id}}">Check Task Status</a>
+             <a class="btn btn-secondary" href="/employee/{{emp._id}}"  style="color: black;">Edit Profile</a>
         </div>
     </body>
 </html>

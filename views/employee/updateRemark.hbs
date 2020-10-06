@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Update Remark</title>
+    </head>
+    <body>
+        <h1>Update Status</h1>
+        <form action="/employee/setRemark" method="POST" >
+    <div class="form-group">
+         <input type="text" class="form-control" name="managerId" value="{{m_id}}">
+         <input type="text" class="form-control" name="taskId" value="{{t_id}}">
+         <label>Remark</label>
+        <input type="text" class="form-control" name="remark" placeholder="Remark for the  task" required>
+    </div>
+     <button type="submit" class="btn btn-info"><i class="fa fa-database"></i> Submit</button>
+        </form>
+    
+    </body>
+</html>

@@ -7,7 +7,6 @@
         <label for="Result">{{message}}</label>
         <h1>Welcome {{emp.fullName}}</h1>
         <h2>Your Profile</h2>
-        <h3>Your token {{token}}</h3>
         <div>
             <label for="Name">Name: {{emp.fullName}}</label><br>
             <label for="Email">Email: {{emp.email}}</label><br>
@@ -17,7 +16,8 @@
             
         </div>
         <div>
-            <a href="/employee/employeeViewTask/{{emp._id}}"  style="color: black;">View Task</a>
+            <a class="btn btn-secondary" href="/employee/employeeViewTask/{{emp._id}}"  style="color: black;">View Task</a>
+             <a class="btn btn-secondary" href="/employee/{{emp._id}}"  style="color: black;">Edit Profile</a>
         </div>
     </body>
 </html>

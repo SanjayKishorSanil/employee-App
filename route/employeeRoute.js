@@ -84,7 +84,7 @@ router.post('/', (req, res) => {
         employee.password=req.body.password;
         employee.save((err, doc) => {
             if (!err)
-                res.redirect('employee/list');
+                res.redirect('employee/login');
             else {
                 if (err.name == 'ValidationError') {
                     handleValidationError(err, req.body);
@@ -131,7 +131,22 @@ router.post('/', (req, res) => {
 
 function updateRecord(req, res) {
     Employee.findOneAndUpdate({ _id: req.body._id }, req.body, { new: true }, (err, doc) => {
-        if (!err) { res.redirect('employee/list'); }
+        if (!err) { 
+          //  res.redirect('employee/list');
+          if(req.body.jobRole==='Manager'){
+            res.render("layouts/dashboardManager", {
+                message:'Sucessfully updated',
+                emp:req.body
+            }); 
+          }else{
+            res.render("layouts/dashboard", {
+                message:'Sucessfully updated',
+                emp:req.body
+            }); 
+
+          }
+ 
+         }
         else {
             if (err.name == 'ValidationError') {
                 handleValidationError(err, req.body);
@@ -167,22 +182,69 @@ router.get('/listForManager/:id',(req,res)=>{
                })
 
 })
+router.get('/updateRemark/:tid&:mid', async(req,res)=>{
+    const tid=req.params.tid
+    const mid=req.params.mid
+    res.render('employee/updateRemark',{
+        m_id:mid,
+        t_id:tid
+    })
+
+
+})
+router.post('/setRemark', async(req,res)=>{
+    const t_id=req.body.taskId
+    const m_id=req.body.managerId
+    //console.log(t_id,m_id)
+
+    Employee.find(async(err,docs)=>{
+        // console.log('docds',docs)
+         docs.forEach(async doc=>{
+            // console.log('docds',doc)
+            //console.log('Task',doc.tasks)
+            doc.tasks.forEach(async t=>{
+              //  console.log('t',typeof t.managerID)
+               if(t._id.toString()===t_id && t.managerID.toString()===m_id){
+                   t.remark=req.body.remark
+                   await doc.save()
+
+               }
+            })
+             
+         })
+         res.render("employee/sucessRemark",{
+            mid:m_id
+        })
+     })
+
+
+})
 router.get('/listStatus/:id',async (req,res)=>{
     const employeeList=[]
+    const taskList=[]
     const m_id=req.params.id
-    console.log(m_id)
-    
-    Task.find({managerId:m_id},async(err,docs)=>{
-        docs.forEach(e=>{
-            Employee.findOne({_id:e.employeeId},async(err,doc)=>{
-                console.log('docs',docs)
-                console.log('doc',doc)
-                employeeList.push(doc)
-            })
+    var count=0
+    //console.log(m_id)
+    let m= await Task.find({managerId:m_id})
+    for(const mng of m){
+        let a= await Employee.findOne({_id:mng.employeeId})
+        employeeList.push(a)
+    }
+    //console.log('employeeList',employeeList)
+    employeeList.forEach( doc=>{
+       //console.log('count doc')
+        doc.tasks.forEach(t=>{
+            if(t.managerID.toString() ===m_id){
+                taskList.push(t)
+            }
         })
+    })
+
+    console.log('tasklist',taskList)
+    res.render('employee/taskStatusDisplay',{
+        list:taskList
 
     })
-    console.log('employeeList',employeeList)
 })
 router.get('/addTask/:mId&:eId',async(req,res)=>{
     const m_id=req.params.mId
@@ -210,11 +272,10 @@ router.post('/assignTask', async(req,res)=>{
     await task.save((err,doc)=>{
         if(!err){
             console.log('Sucessfully added')
-          res.render("employee/assignTask",{
-                managerId:m_id,
-                employeeId:e_id,
-                message:'Sucessfully Assigned'
+            res.render('employee/assignTaskSucessPage',{
+                mid:m_id
             })
+
             
           
         }
@@ -238,22 +299,39 @@ router.get('/addReportee/:mId&:eId',async(req,res)=>{
         manager.reportees=manager.reportees.concat({reportee:e_id})
         await manager.save()
         console.log('Sucessfuly added')
+
     }else{
         m.reportees=m.reportees.concat({reportee:e_id})
         await m.save()
         console.log('sucessfully added reportee')
     }
 
+    // for(const mng of m.reportees){
+    //     let a =await Employee.findOne({_id:mng.reportee})
+    //     reporteeList.push(a)
+    // }
+    res.render('employee/addReporteeSucessPage',{
+        mid:m_id
+    })
+    
+
+
+        
+
+
+})
+router.get('/viewReportees/:id',async (req,res)=>{
+    const m_id= req.params.id
+    const reporteeList=[]
+    let m= await Manager.findOne({managerId:m_id})
     for(const mng of m.reportees){
         let a =await Employee.findOne({_id:mng.reportee})
-        console.log('a',a)
         reporteeList.push(a)
     }
     res.render("employee/reporteeList", {
         managerId:m_id,
             list: reporteeList
     })
-        
 
 
 })
@@ -287,11 +365,17 @@ router.post('/setStatus', async (req,res)=>{
     var task = new Task()
     const m_id=req.body.managerId
     const e_id=req.body.employeeId
-    console.log(e_id,m_id)
     Task.findOne({managerId:m_id,employeeId:e_id},async(err,doc)=>{
         doc.status=req.body.status
         await doc.save()
     })
+    Employee.findOne({_id:e_id}, async(err,doc)=>{
+        for(m of doc.tasks){
+            m.status=req.body.status
+            await doc.save()
+        }
+    })
+
     res.render('employee/sucessPage',{
         eid:e_id
     })

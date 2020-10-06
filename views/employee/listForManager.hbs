@@ -1,7 +1,8 @@
 <h1>Manager Dashboard</h1>
 <h3><a class="btn btn-secondary" href="/employee"><i class="fa fa-plus"></i> Create New</a> Employee List</h3>
+<a class="btn btn-secondary" href="/employee/viewReportees/{{managerId}}"> View Reportees</a>
 <table class="table table-striped">
-    <p id="managerId">MANAGER ID {{managerId}}</p>
+    <p hidden id="managerId">MANAGER ID {{managerId}}</p>
     <thead>
         <tr>
             <th>Full Name</th>

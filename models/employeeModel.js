@@ -35,7 +35,12 @@ var employeeSchema = new mongoose.Schema({
             type:String
         },
         status:{
-            type:String
+            type:String,
+            default:'Not Updated'
+        },
+        remark:{
+            type:String,
+            default:'No Remarks'
         }
     }],
     //leaves:[{

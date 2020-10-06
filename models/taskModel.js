@@ -15,6 +15,10 @@ var taskSchema= new mongoose.Schema({
     status:{
         type:String,
         default:'pending'
+    },
+    remark:{
+        type:String,
+        default:'No Remarks'
     }
 
 })
