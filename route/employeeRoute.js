@@ -390,10 +390,16 @@ router.get('/checkLeaveStatus/:id', async(req,res)=>{
 router.get('/updateLeaveStatus/:mid&:eid',async(req,res)=>{
     const m_id= req.params.mid
     const e_id = req.params.eid
+    var leaveList=[]
+    let e = await offDays.find({employeeId:e_id})
+    for(const emp of e){
+        leaveList.push(emp)
+    }
 
     res.render('employee/setLeaveStatus',{
         mid:m_id,
-        eid:e_id
+        eid:e_id,
+        list:leaveList
     })
 
 
@@ -492,5 +498,22 @@ router.get('/delete/:id', (req, res) => {
         else { console.log('Error in employee delete :' + err); }
     });
 });
+
+router.get('/deleteLeave/:id', async(req,res)=>{
+    offDays.findByIdAndRemove(req.params.id,async(err,doc)=>{
+        if(!err){
+    const e_id= req.params.id
+    leaveList=[]
+    let e = await offDays.find({employeeId:e_id})
+    for(const emp of e){
+        leaveList.push(emp)
+    }
+    res.render('employee/listLeaveStatus',{
+        list:leaveList,
+        eid:e_id
+    })
+        }
+    })
+})
 
 module.exports = router;

@@ -5,10 +5,31 @@
     </head>
     <body>
         <h1>Set Leave Status</h1>
+        <table class="table table-striped">
+    <thead>
+        <tr>
+            <th>From Date</th>
+            <th>To Date</th>
+            <th>Reason</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each list}}
+        
+        <tr>
+            <td>{{this.fromDate}}</td>
+            <td>{{this.toDate}}</td>
+            <td>{{this.reason}}</td>
+            <td>{{this.status}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
         <form action="/employee/setLeaveStatus" method="POST" >
     <div class="form-group">
-         <input type="text" class="form-control" name="managerId" value="{{mid}}">
-         <input type="text" class="form-control" name="employeeId" value="{{eid}}">
+         <input hidden type="text" class="form-control" name="managerId" value="{{mid}}">
+         <input hidden type="text" class="form-control" name="employeeId" value="{{eid}}">
          <label>Status</label>
         <input type="text" class="form-control" name="status" placeholder="Status of the task" required>
     </div>

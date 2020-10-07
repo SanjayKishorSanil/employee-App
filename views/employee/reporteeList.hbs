@@ -1,5 +1,5 @@
 <h1>Manager Dashboard</h1>
-<h3><a class="btn btn-secondary" href="#"> View Assigned Task</a> Reportee List</h3>
+<h3> Reportee List</h3>
 <table class="table table-striped">
     <p hidden id="managerId">MANAGER ID {{managerId}}</p>
     <thead>
@@ -18,9 +18,8 @@
             <td>
                  <a class="btn btn-secondary" href="/employee/addTask/{{../managerId}}&{{this._id}} "  style="color: black;">ADD TASK</a>
                  <a class="btn btn-secondary" href="/employee/updateLeaveStatus/{{../managerId}}&{{this._id}} "  style="color: black;">Leave Application</a>
-                
-
             </td>
+            
         </tr>
         {{/each}}
     </tbody>

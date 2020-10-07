@@ -16,6 +16,9 @@
             <td>{{this.toDate}}</td>
             <td>{{this.reason}}</td>
             <td>{{this.status}}</td>
+            <td>
+              <a class="btn btn-secondary" href="/employee/deleteLeave/{{this._id}}"  style="color: rgb(0, 0, 0);">Delete Request</a>
+            </td>
         </tr>
         {{/each}}
     </tbody>
