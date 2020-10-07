@@ -6,6 +6,7 @@
         <tr>
             <th>Task Name</th>
             <th>Status Updated</th>
+            <th>Remark</th>
         </tr>
     </thead>
     <tbody>
@@ -14,6 +15,7 @@
         <tr>
             <td>{{this.taskGiven}}</td>
             <td>{{this.status}}</td>
+            <td>{{this.remark}}</td>
             <td>
                 <a href="/employee/updateRemark/{{this._id}}&{{this.managerID}}"><i class="fa fa-pencil fa-lg" aria-hidden="true"></i> Update Remark</a>
             </td>

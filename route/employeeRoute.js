@@ -5,6 +5,7 @@ const Employee = mongoose.model('Employee');
 const employee=require('../models/employeeModel')
 const Manager=require('../models/managerModel')
 const Task=require('../models/taskModel')
+const offDays= require('../models/offDaysModel')
 const bcrypt=require('bcryptjs')
 const auth=require('../middleware/auth')
 
@@ -349,6 +350,65 @@ router.get('/employeeViewTask/:id',async (req,res)=>{
     })
 })
 
+router.get('/applyLeave/:id', async (req,res)=>{
+    const e_id= req.params.id
+    res.render('employee/applyLeave',{
+        eid:e_id
+    })
+})
+
+router.post('/postLeave', async(req,res)=>{
+    var leave= new offDays()
+    leave.employeeId = req.body.employeeId
+    leave.fromDate = req.body.fromdate
+    leave.toDate = req.body.todate
+    leave.reason = req.body.reason
+    leave.noOfDays = req.body.noofdays
+    await leave.save()
+    Employee.findOne({_id:req.body.employeeId}, async(err,doc)=>{
+        console.log('sucessfully applied')
+        res.render("layouts/dashboard", {
+            message:'Sucessfully Applied Leave',
+            emp:doc
+        }); 
+    })
+
+})
+
+router.get('/checkLeaveStatus/:id', async(req,res)=>{
+    const e_id= req.params.id
+    leaveList=[]
+    let e = await offDays.find({employeeId:e_id})
+    for(const emp of e){
+        leaveList.push(emp)
+    }
+    res.render('employee/listLeaveStatus',{
+        list:leaveList,
+        eid:e_id
+    })
+})
+router.get('/updateLeaveStatus/:mid&:eid',async(req,res)=>{
+    const m_id= req.params.mid
+    const e_id = req.params.eid
+
+    res.render('employee/setLeaveStatus',{
+        mid:m_id,
+        eid:e_id
+    })
+
+
+})
+router.post('/setLeaveStatus', async(req,res)=>{
+    let e = await offDays.find({employeeId:req.body.employeeId})
+    for(const emp of e){
+        emp.status=req.body.status
+        emp.managerId=req.body.managerId
+        await emp.save()
+        res.render('employee/sucessLeaveStatus',{
+            mid:req.body.managerId
+        })
+    }
+})
 router.get('/updateStatus/:eid&:mid',async (req,res)=>{
     const eid=req.params.eid
     const mid=req.params.mid

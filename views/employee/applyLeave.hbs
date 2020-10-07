@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Apply Leave</title>
+    </head>
+    <body>
+        <h1>Apply Leave</h1>
+        <form action="/employee/postLeave" method="POST" >
+    <div class="form-group">
+         <input type="text" class="form-control" name="employeeId" value="{{eid}}">
+        <label>From Date</label>
+        <input type="text" class="form-control" name="fromdate" placeholder="Start date of leave" required>
+        <label>To Date</label>
+        <input type="text" class="form-control" name="todate" placeholder="End date of leave" required>
+        <label>Reason</label>
+        <input type="text" class="form-control" name="reason" placeholder="Reason" required>
+        <label>No of days</label>
+        <input type="text" class="form-control" name="noofdays" placeholder="No of days" required>
+    </div>
+     <button type="submit" class="btn btn-info"><i class="fa fa-database"></i> Apply</button>
+        </form>
+    
+    </body>
+</html>

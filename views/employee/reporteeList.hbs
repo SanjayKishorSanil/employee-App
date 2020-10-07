@@ -16,12 +16,9 @@
             <td>{{this.fullName}}</td>
             <td>{{this.jobRole}}</td>
             <td>
-                 <a href="/employee/addTask/{{../managerId}}&{{this._id}} "  style="color: black;">ADD TASK</a>
-                <!-- <a href="/employee/{{this._id}}"><i class="fa fa-pencil fa-lg" aria-hidden="true"></i></a> -->
+                 <a class="btn btn-secondary" href="/employee/addTask/{{../managerId}}&{{this._id}} "  style="color: black;">ADD TASK</a>
+                 <a class="btn btn-secondary" href="/employee/updateLeaveStatus/{{../managerId}}&{{this._id}} "  style="color: black;">Leave Application</a>
                 
-              <!--  <a href="/employee/delete/{{this._id}}" onclick="return confirm('Are you sure to delete this record ?');"><i class="fa fa-trash fa-lg" aria-hidden="true"></i></a>
-                <a href="/employee/addReportee/{{../managerId}}&{{this._id}} "  style="color: black;">ADD REPORTEE</a>
-                <p hidden id="empId">{{this._id}}</p>-->
 
             </td>
         </tr>

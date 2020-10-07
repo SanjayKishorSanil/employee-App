@@ -1,0 +1,23 @@
+<h1>View Leave Status</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>From Date</th>
+            <th>To Date</th>
+            <th>Reason</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each list}}
+        
+        <tr>
+            <td>{{this.fromDate}}</td>
+            <td>{{this.toDate}}</td>
+            <td>{{this.reason}}</td>
+            <td>{{this.status}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+  <a class="btn btn-secondary" href="/employee/login"  style="color: rgb(0, 0, 0);">Logout</a>
