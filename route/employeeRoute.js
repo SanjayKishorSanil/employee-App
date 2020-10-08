@@ -18,7 +18,6 @@ router.get('/login',(req,res)=>{
 })
 router.get('/logout', auth,async(req,res)=>{
     try{
-        console.log('Entered logout')
         req.employee.tokens=req.employee.tokens.filter((token)=>{
             return token.token !== req.token
         })
@@ -27,7 +26,10 @@ router.get('/logout', auth,async(req,res)=>{
             message:'LOGIN PAGE'
         })
     }catch(e){
-        res.status(500).send(e)
+        res.render('employee/404Page',{
+            message:'Enable to Logout',
+            url:'/employee/login'
+        })
 
     }
 })
@@ -44,10 +46,12 @@ router.post('/login',async(req,res) =>{
         
 
         if(!isMatch){
-           return res.send('Invalid credentials')
+           return res.render('employee/404Page',{
+            message:'Invalid Credentials',
+            url:'/employee/login'
+        })
         }
         if(emp.jobRole === 'Manager'){
-           // res.setHeader('Authorization','Bearer '+token)
            res.cookie("jwt", token, { httpOnly: true})
             res.render("layouts/dashboardManager", {
                 message:'Sucessfully Logged In',
@@ -56,7 +60,6 @@ router.post('/login',async(req,res) =>{
             });   
 
         }else{
-           // res.setHeader('Authorization','Bearer '+token)
            res.cookie("jwt", token, { httpOnly: true})
             res.render("layouts/dashboard", {
                 message:'Sucessfully Logged In',
@@ -66,7 +69,10 @@ router.post('/login',async(req,res) =>{
         }
 
     }catch(e){
-        res.status(400).send(e)
+        res.render('employee/404Page',{
+            message:'Error in login route',
+            url:'/employee/login'
+        })
     }
 })
 
@@ -133,8 +139,12 @@ router.post('/', (req, res) => {
                         employee: req.body
                     });
                 }
-                else
-                    console.log('Error during record insertion : ' + err);
+                else{
+                    res.render('employee/404Page',{
+                        message:'Enable to insert record',
+                        url:'/employee/login'
+                    })
+                }
             }
         });
     }
@@ -145,7 +155,6 @@ router.post('/', (req, res) => {
 function updateRecord(req, res) {
     Employee.findOneAndUpdate({ _id: req.body._id }, req.body, { new: true }, (err, doc) => {
         if (!err) { 
-          //  res.redirect('employee/list');
           if(req.body.jobRole==='Manager'){
             res.render("layouts/dashboardManager", {
                 message:'Sucessfully updated',
@@ -159,8 +168,7 @@ function updateRecord(req, res) {
 
           }
  
-         }
-        else {
+         }else {
             if (err.name == 'ValidationError') {
                 handleValidationError(err, req.body);
                 res.render("employee/addOrEdit", {
@@ -168,8 +176,12 @@ function updateRecord(req, res) {
                     employee: req.body
                 });
             }
-            else
-                console.log('Error during record update : ' + err);
+            else{
+                res.render('employee/404Page',{
+                    message:'Error in Updating Record',
+                    url:'/employee/login'
+                })
+            }
         }
     });
 }
@@ -178,18 +190,18 @@ function updateRecord(req, res) {
 router.get('/listForManager/:id',auth,(req,res)=>{
         Employee.find((err,docs)=>{
             const m_id=req.params.id
-
                     if(!err){
                         const doc = docs.filter(emp=> emp.jobRole != 'Manager')
-                       // console.log(doc)
-                       //res.setHeader('Authorization','Bearer '+token)
                         res.render("employee/listForManager", {
                             list: doc,
                             managerId: m_id
                         });
     
                     }else{
-                        res.send('ERROR OCCURED IN FUNCTION')
+                        res.render('employee/404Page',{
+                            message:'Error in Listing Reportee for Manager',
+                            url:'/employee/login'
+                        })
                     }
 
                })
@@ -208,15 +220,12 @@ router.get('/updateRemark/:tid&:mid',auth, async(req,res)=>{
 router.post('/setRemark',auth, async(req,res)=>{
     const t_id=req.body.taskId
     const m_id=req.body.managerId
-    //console.log(t_id,m_id)
-
     Employee.find(async(err,docs)=>{
-        // console.log('docds',docs)
+        
          docs.forEach(async doc=>{
-            // console.log('docds',doc)
-            //console.log('Task',doc.tasks)
+            
             doc.tasks.forEach(async t=>{
-              //  console.log('t',typeof t.managerID)
+
                if(t._id.toString()===t_id && t.managerID.toString()===m_id){
                    t.remark=req.body.remark
                    await doc.save()
@@ -236,16 +245,12 @@ router.get('/listStatus/:id',auth,async (req,res)=>{
     const employeeList=[]
     const taskList=[]
     const m_id=req.params.id
-    var count=0
-    //console.log(m_id)
     let m= await Task.find({managerId:m_id})
     for(const mng of m){
         let a= await Employee.findOne({_id:mng.employeeId})
         employeeList.push(a)
     }
-    //console.log('employeeList',employeeList)
     employeeList.forEach( doc=>{
-       //console.log('count doc')
         doc.tasks.forEach(t=>{
             if(t.managerID.toString() ===m_id){
                 taskList.push(t)
@@ -253,7 +258,6 @@ router.get('/listStatus/:id',auth,async (req,res)=>{
         })
     })
 
-    console.log('tasklist',taskList)
     res.render('employee/taskStatusDisplay',{
         list:taskList
 
@@ -287,13 +291,13 @@ router.post('/assignTask',auth, async(req,res)=>{
             console.log('Sucessfully added')
             res.render('employee/assignTaskSucessPage',{
                 mid:m_id
-            })
-
-            
-          
+            })          
         }
         else{
-           console.log(err)
+            res.render('employee/404Page',{
+                message:'Error occured while assigning task',
+                url:'/employee/login'
+            })
         }
     })
 
@@ -311,26 +315,13 @@ router.get('/addReportee/:mId&:eId',auth,async(req,res)=>{
         manager.managerId=m_id
         manager.reportees=manager.reportees.concat({reportee:e_id})
         await manager.save()
-        console.log('Sucessfuly added')
-
     }else{
         m.reportees=m.reportees.concat({reportee:e_id})
         await m.save()
-        console.log('sucessfully added reportee')
     }
-
-    // for(const mng of m.reportees){
-    //     let a =await Employee.findOne({_id:mng.reportee})
-    //     reporteeList.push(a)
-    // }
     res.render('employee/addReporteeSucessPage',{
         mid:m_id
     })
-    
-
-
-        
-
 
 })
 router.get('/viewReportees/:id',auth,async (req,res)=>{
@@ -357,6 +348,11 @@ router.get('/employeeViewTask/:id',auth,async (req,res)=>{
                 list:t,
                 eid:e_id
             })
+        }else{
+            res.render('employee/404Page',{
+                message:'Error in Task Viewing',
+                url:'/employee/login'
+            })
         }
         
     })
@@ -378,11 +374,18 @@ router.post('/postLeave',auth, async(req,res)=>{
     leave.noOfDays = req.body.noofdays
     await leave.save()
     Employee.findOne({_id:req.body.employeeId}, async(err,doc)=>{
-        console.log('sucessfully applied')
-        res.render("layouts/dashboard", {
-            message:'Sucessfully Applied Leave',
-            emp:doc
-        }); 
+        if(!err){
+            res.render("layouts/dashboard", {
+                message:'Sucessfully Applied Leave',
+                emp:doc
+            }); 
+        }else{
+               res.render('employee/404Page',{
+                message:'Cannot Apply for Leave',
+                url:'/employee/login'
+            })
+        }
+
     })
 
 })
@@ -458,19 +461,18 @@ router.post('/setStatus',auth, async (req,res)=>{
         eid:e_id
     })
 })
-router.get('/list',auth, (req, res) => {
+router.get('/list', (req, res) => {
     Employee.find((err, docs) => {
-        // console.log(docs)
-        // docs.forEach((doc)=>{
-        //     console.log(doc.jobRole)
-        // })
         if (!err) {
             res.render("employee/list", {
                 list: docs
             });
         }
         else {
-            console.log('Error in retrieving employee list :' + err);
+            res.render('employee/404Page',{
+                message:'Error in retriving employee list !',
+                url:'/employee/login'
+            })
         }
     });
 });
@@ -498,6 +500,11 @@ router.get('/:id',auth, (req, res) => {
                 viewTitle: "Update Employee",
                 employee: doc
             });
+        }else{
+            res.render('employee/404Page',{
+                message:'Error in fetching user id',
+                url:'/employee/login'
+            })
         }
     });
 });
@@ -507,7 +514,12 @@ router.get('/delete/:id',auth, (req, res) => {
         if (!err) {
             res.redirect('/employee/list');
         }
-        else { console.log('Error in employee delete :' + err); }
+        else { 
+            res.render('employee/404Page',{
+                message:'Cannot delete employee ERROR!!!',
+                url:'/employee/login'
+            })
+         }
     });
 });
 
@@ -524,6 +536,11 @@ router.get('/deleteLeave/:id',auth, async(req,res)=>{
         list:leaveList,
         eid:e_id
     })
+        }else{
+            res.render('employee/404Page',{
+                message:'Error in Deleting Leave',
+                url:'/employee/login'
+            })
         }
     })
 })
