@@ -8,6 +8,7 @@ const Task=require('../models/taskModel')
 const offDays= require('../models/offDaysModel')
 const bcrypt=require('bcryptjs')
 const auth=require('../middleware/auth')
+const jwt=require('jsonwebtoken')
 
 router.get('/login',(req,res)=>{
     res.render('employee/login',{
@@ -15,29 +16,39 @@ router.get('/login',(req,res)=>{
     })
     
 })
+router.get('/logout', auth,async(req,res)=>{
+    try{
+        console.log('Entered logout')
+        req.employee.tokens=req.employee.tokens.filter((token)=>{
+            return token.token !== req.token
+        })
+        await req.employee.save()
+        res.render('employee/login',{
+            message:'LOGIN PAGE'
+        })
+    }catch(e){
+        res.status(500).send(e)
 
+    }
+})
 router.post('/login',async(req,res) =>{
     try{
        
        const emp= await Employee.findOne({email:req.body.email})
-       const token= await emp.generateAuthToken()
         if(!emp){
            
           return res.send('Invalid credentials')
         }
-
+        const token= await emp.generateAuthToken()
         const isMatch = await bcrypt.compare(req.body.password,emp.password)
         
 
         if(!isMatch){
            return res.send('Invalid credentials')
         }
-        
-        //res.send({emp})
-        //console.log(emp)
-        //console.log(token)
         if(emp.jobRole === 'Manager'){
-            res.setHeader('Authorization','Bearer '+token)
+           // res.setHeader('Authorization','Bearer '+token)
+           res.cookie("jwt", token, { httpOnly: true})
             res.render("layouts/dashboardManager", {
                 message:'Sucessfully Logged In',
                 emp,
@@ -45,6 +56,8 @@ router.post('/login',async(req,res) =>{
             });   
 
         }else{
+           // res.setHeader('Authorization','Bearer '+token)
+           res.cookie("jwt", token, { httpOnly: true})
             res.render("layouts/dashboard", {
                 message:'Sucessfully Logged In',
                 emp,
@@ -83,7 +96,7 @@ router.post('/', (req, res) => {
         employee.jobRole=req.body.jobRole;
         employee.salary=req.body.salary;
         employee.password=req.body.password;
-        employee.save((err, doc) => {
+        employee.save(async(err, doc) => {
             if (!err)
                 res.redirect('employee/login');
             else {
@@ -98,7 +111,7 @@ router.post('/', (req, res) => {
                     console.log('Error during record insertion : ' + err);
             }
         });
-       const token = await employee.generateAuthToken()
+       
     }else{
         var employee = new Employee();
         employee.fullName = req.body.fullName;
@@ -108,7 +121,7 @@ router.post('/', (req, res) => {
         employee.jobRole=req.body.jobRole;
         employee.salary=req.body.salary;
         employee.password=req.body.password;
-        employee.save((err, doc) => {
+        employee.save(async(err, doc) => {
             if (!err){
                res.redirect('employee/login')
             }
@@ -124,7 +137,6 @@ router.post('/', (req, res) => {
                     console.log('Error during record insertion : ' + err);
             }
         });
-        const token = await employee.generateAuthToken()
     }
   
 }
@@ -163,7 +175,7 @@ function updateRecord(req, res) {
 }
 
 
-router.get('/listForManager/:id',(req,res)=>{
+router.get('/listForManager/:id',auth,(req,res)=>{
         Employee.find((err,docs)=>{
             const m_id=req.params.id
 
@@ -183,7 +195,7 @@ router.get('/listForManager/:id',(req,res)=>{
                })
 
 })
-router.get('/updateRemark/:tid&:mid', async(req,res)=>{
+router.get('/updateRemark/:tid&:mid',auth, async(req,res)=>{
     const tid=req.params.tid
     const mid=req.params.mid
     res.render('employee/updateRemark',{
@@ -193,7 +205,7 @@ router.get('/updateRemark/:tid&:mid', async(req,res)=>{
 
 
 })
-router.post('/setRemark', async(req,res)=>{
+router.post('/setRemark',auth, async(req,res)=>{
     const t_id=req.body.taskId
     const m_id=req.body.managerId
     //console.log(t_id,m_id)
@@ -220,7 +232,7 @@ router.post('/setRemark', async(req,res)=>{
 
 
 })
-router.get('/listStatus/:id',async (req,res)=>{
+router.get('/listStatus/:id',auth,async (req,res)=>{
     const employeeList=[]
     const taskList=[]
     const m_id=req.params.id
@@ -247,7 +259,7 @@ router.get('/listStatus/:id',async (req,res)=>{
 
     })
 })
-router.get('/addTask/:mId&:eId',async(req,res)=>{
+router.get('/addTask/:mId&:eId',auth,async(req,res)=>{
     const m_id=req.params.mId
     const e_id=req.params.eId
 
@@ -257,7 +269,7 @@ router.get('/addTask/:mId&:eId',async(req,res)=>{
     })
 })
 
-router.post('/assignTask', async(req,res)=>{
+router.post('/assignTask',auth, async(req,res)=>{
     console.log(req.body)
     const m_id=req.body.managerId
     const e_id=req.body.employeeId
@@ -287,7 +299,7 @@ router.post('/assignTask', async(req,res)=>{
 
 })
 
-router.get('/addReportee/:mId&:eId',async(req,res)=>{
+router.get('/addReportee/:mId&:eId',auth,async(req,res)=>{
     
     const m_id=req.params.mId
     const e_id=req.params.eId
@@ -321,7 +333,7 @@ router.get('/addReportee/:mId&:eId',async(req,res)=>{
 
 
 })
-router.get('/viewReportees/:id',async (req,res)=>{
+router.get('/viewReportees/:id',auth,async (req,res)=>{
     const m_id= req.params.id
     const reporteeList=[]
     let m= await Manager.findOne({managerId:m_id})
@@ -336,7 +348,7 @@ router.get('/viewReportees/:id',async (req,res)=>{
 
 
 })
-router.get('/employeeViewTask/:id',async (req,res)=>{
+router.get('/employeeViewTask/:id',auth,async (req,res)=>{
     const e_id = req.params.id
     Employee.findById(e_id,async(err,doc)=>{
         if(!err){
@@ -350,14 +362,14 @@ router.get('/employeeViewTask/:id',async (req,res)=>{
     })
 })
 
-router.get('/applyLeave/:id', async (req,res)=>{
+router.get('/applyLeave/:id', auth,async (req,res)=>{
     const e_id= req.params.id
     res.render('employee/applyLeave',{
         eid:e_id
     })
 })
 
-router.post('/postLeave', async(req,res)=>{
+router.post('/postLeave',auth, async(req,res)=>{
     var leave= new offDays()
     leave.employeeId = req.body.employeeId
     leave.fromDate = req.body.fromdate
@@ -375,7 +387,7 @@ router.post('/postLeave', async(req,res)=>{
 
 })
 
-router.get('/checkLeaveStatus/:id', async(req,res)=>{
+router.get('/checkLeaveStatus/:id',auth, async(req,res)=>{
     const e_id= req.params.id
     leaveList=[]
     let e = await offDays.find({employeeId:e_id})
@@ -387,7 +399,7 @@ router.get('/checkLeaveStatus/:id', async(req,res)=>{
         eid:e_id
     })
 })
-router.get('/updateLeaveStatus/:mid&:eid',async(req,res)=>{
+router.get('/updateLeaveStatus/:mid&:eid',auth,async(req,res)=>{
     const m_id= req.params.mid
     const e_id = req.params.eid
     var leaveList=[]
@@ -404,7 +416,7 @@ router.get('/updateLeaveStatus/:mid&:eid',async(req,res)=>{
 
 
 })
-router.post('/setLeaveStatus', async(req,res)=>{
+router.post('/setLeaveStatus',auth, async(req,res)=>{
     let e = await offDays.find({employeeId:req.body.employeeId})
     for(const emp of e){
         emp.status=req.body.status
@@ -415,7 +427,7 @@ router.post('/setLeaveStatus', async(req,res)=>{
         })
     }
 })
-router.get('/updateStatus/:eid&:mid',async (req,res)=>{
+router.get('/updateStatus/:eid&:mid',auth,async (req,res)=>{
     const eid=req.params.eid
     const mid=req.params.mid
     console.log(eid,mid)
@@ -427,7 +439,7 @@ router.get('/updateStatus/:eid&:mid',async (req,res)=>{
     
 })
 
-router.post('/setStatus', async (req,res)=>{
+router.post('/setStatus',auth, async (req,res)=>{
     var task = new Task()
     const m_id=req.body.managerId
     const e_id=req.body.employeeId
@@ -446,7 +458,7 @@ router.post('/setStatus', async (req,res)=>{
         eid:e_id
     })
 })
-router.get('/list', (req, res) => {
+router.get('/list',auth, (req, res) => {
     Employee.find((err, docs) => {
         // console.log(docs)
         // docs.forEach((doc)=>{
@@ -479,7 +491,7 @@ function handleValidationError(err, body) {
     }
 }
 
-router.get('/:id', (req, res) => {
+router.get('/:id',auth, (req, res) => {
     Employee.findById(req.params.id, (err, doc) => {
         if (!err) {
             res.render("employee/addOrEdit", {
@@ -490,7 +502,7 @@ router.get('/:id', (req, res) => {
     });
 });
 
-router.get('/delete/:id', (req, res) => {
+router.get('/delete/:id',auth, (req, res) => {
     Employee.findByIdAndRemove(req.params.id, (err, doc) => {
         if (!err) {
             res.redirect('/employee/list');
@@ -499,7 +511,7 @@ router.get('/delete/:id', (req, res) => {
     });
 });
 
-router.get('/deleteLeave/:id', async(req,res)=>{
+router.get('/deleteLeave/:id',auth, async(req,res)=>{
     offDays.findByIdAndRemove(req.params.id,async(err,doc)=>{
         if(!err){
     const e_id= req.params.id
