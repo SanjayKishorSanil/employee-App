@@ -79,6 +79,13 @@ router.post('/login',async(req,res) =>{
 })
 
 router.get('/', (req, res) => {
+    
+    res.render('employee/login',{
+        message :'LOGIN PAGE'
+    });
+});
+
+router.get('/createUser',async(req,res)=>{
     res.render("employee/addOrEdit", {
         viewTitle : "Insert Employee"
     });
@@ -193,12 +200,12 @@ function updateRecord(req, res) {
 
 router.get('/listForManager/:id',auth,(req,res)=>{
         Employee.find((err,docs)=>{
-            const m_id = req.params.id;
+            const mId = req.params.id;
                     if(!err){
                         const doc = docs.filter(emp=> emp.jobRole != 'Manager')
                         res.render("employee/listForManager", {
                             list : doc,
-                            managerId : m_id
+                            managerId : mId
                         });
     
                     }else{
@@ -208,14 +215,14 @@ router.get('/listForManager/:id',auth,(req,res)=>{
                         });
                     }
                });
-})
+});
 
 router.get('/updateRemark/:tid&:mid',auth, async(req,res)=>{
-    const tid = req.params.tid;
-    const mid = req.params.mid;
+    const tId = req.params.tid;
+    const mId = req.params.mid;
     res.render('employee/updateRemark',{
-        m_id : mid,
-        t_id : tid
+        m_id : mId,
+        t_id : tId
     });
 
 
@@ -427,7 +434,7 @@ router.get('/updateLeaveStatus/:mid&:eid',auth,async(req,res)=>{
 router.post('/setLeaveStatus',auth, async(req,res)=>{
     let e = await offDays.find({employeeId:req.body.employeeId});
     for(const emp of e){
-        emp.status = req.body.status;
+        emp.status = req.body.Status;
         emp.managerId = req.body.managerId;
         await emp.save();
         res.render('employee/sucessLeaveStatus',{
@@ -491,6 +498,9 @@ function handleValidationError(err, body) {
                 break;
             case 'email':
                 body['emailError'] = err.errors[field].message;
+                break;
+            case 'mobile':
+                body['mobileError'] = err.errors[field].message;
                 break;
             default:
                 break;

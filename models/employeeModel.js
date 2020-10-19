@@ -68,6 +68,13 @@ employeeSchema.path('email').validate((val) => {
     return emailRegex.test(val);
 }, 'Invalid e-mail.');
 
+employeeSchema.path('mobile').validate((val)=>{
+    var phoneno = /^\d{10}$/;
+    if((val.match(phoneno)))
+        return true;
+    else
+        return false;        
+},'Invalid Phone Number Format.')
 
 
 

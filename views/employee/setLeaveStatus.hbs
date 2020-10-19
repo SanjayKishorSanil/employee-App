@@ -22,19 +22,27 @@
             <td>{{this.toDate}}</td>
             <td>{{this.reason}}</td>
             <td>{{this.status}}</td>
+            <td>
+                <form action="/employee/setLeaveStatus" method="POST" >
+                <div class="form-group">
+                <input hidden type="text" class="form-control" name="managerId" value="{{../mid}}">
+                <input hidden type="text" class="form-control" name="employeeId" value="{{../eid}}">
+                <input type="radio" id="Accept" name="Status" value="Accept">
+                <label for="Accept">Accept</label><br>
+                <input type="radio" id="Reject" name="Status" value="Reject">
+                <label for="Reject">Reject</label><br>
+                </div>
+                <button type="submit" class="btn btn-info"><i class="fa fa-database"></i>Submit</button>
+                </form>
+               
+            </td>
         </tr>
         {{/each}}
     </tbody>
 </table>
-        <form action="/employee/setLeaveStatus" method="POST" >
-    <div class="form-group">
-         <input hidden type="text" class="form-control" name="managerId" value="{{mid}}">
-         <input hidden type="text" class="form-control" name="employeeId" value="{{eid}}">
-         <label>Status</label>
-        <input type="text" class="form-control" name="status" placeholder="Status of the task" required>
-    </div>
-     <button type="submit" class="btn btn-info"><i class="fa fa-database"></i> Apply</button>
-        </form>
+   <!-- 
+         <a href="/employee/setLeaveStatus/{{../mid}}&{{../eid}}&accept">Accept</a>
+                <a href="/employee/setLeaveStatus/{{../mid}}&{{../eid}}&reject" onclick="return confirm('confrim rejection ?');">Reject</a>-->
      <a class="btn btn-secondary"  href="/employee/logout"  style="color: rgb(0, 0, 0);">Logout</a>
     </body>
 </html>
